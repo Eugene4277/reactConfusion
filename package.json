@@ -17,7 +17,8 @@
   "devDependencies": {
     "@babel/core": "^7.8.6",
     "babel-preset-expo": "~8.1.0",
-    "react-native-elements": "^1.0.0-beta8"
+    "react-native-elements": "^1.0.0-beta8",
+    "react-navigation": "^2.18.3"
   },
   "private": true
 }
