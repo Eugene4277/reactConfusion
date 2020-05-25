@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { ScrollView, Text } from "react-native";
 import { Card } from "react-native-elements";
-import { COMMENTS } from "../shared/comments";
 import { LEADERS } from "../shared/leaders";
 import { PROMOTIONS } from "../shared/promotions";
 import { DISHES } from "../shared/dishes";
