@@ -18,7 +18,11 @@
     "@babel/core": "^7.8.6",
     "babel-preset-expo": "~8.1.0",
     "react-native-elements": "^1.0.0-beta8",
-    "react-navigation": "^2.18.3"
+    "react-navigation": "^2.18.3",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.2.0"
   },
   "private": true
 }
