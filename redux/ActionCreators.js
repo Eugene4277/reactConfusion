@@ -22,7 +22,7 @@ export const fetchComments = () => (dispatch) => {
       }
     )
     .then((response) => response.json())
-    .then((comments) => dispatchEvent(addComments(comments)))
+    .then((comments) => dispatch(addComments(comments)))
     .catch((error) => dispatch(commentsFailed(error.message)));
 };
 
@@ -43,6 +43,7 @@ export const fetchDishes = () => (dispatch) => {
     .then(
       (response) => {
         if (response.ok) {
+          console.log("ok1");
           return response;
         } else {
           var error = new Error(
@@ -58,7 +59,7 @@ export const fetchDishes = () => (dispatch) => {
       }
     )
     .then((response) => response.json())
-    .then((dishes) => dispatchEvent(addDishes(dishes)))
+    .then((dishes) => dispatch(addDishes(dishes)))
     .catch((error) => dispatch(dishesFailed(error.message)));
 };
 
@@ -98,7 +99,7 @@ export const fetchPromos = () => (dispatch) => {
       }
     )
     .then((response) => response.json())
-    .then((promos) => dispatchEvent(addPromos(promos)))
+    .then((promos) => dispatch(addPromos(promos)))
     .catch((error) => dispatch(promosFailed(error.message)));
 };
 
@@ -138,7 +139,7 @@ export const fetchLeaders = () => (dispatch) => {
       }
     )
     .then((response) => response.json())
-    .then((leaders) => dispatchEvent(addLeaders(leaders)))
+    .then((leaders) => dispatch(addLeaders(leaders)))
     .catch((error) => dispatch(leadersFailed(error.message)));
 };
 
@@ -154,4 +155,15 @@ export const addLeaders = (leaders) => ({
 export const leadersFailed = (errmess) => ({
   type: ActionTypes.LEADERS_FAILED,
   payload: errmess,
+});
+
+export const postFavorite = (dishId) => (dispatch) => {
+  setTimeout(() => {
+    dispatch(addFavorite(dishId));
+  }, 2000);
+};
+
+export const addFavorite = (dishId) => ({
+  type: ActionTypes.ADD_FAVORITE,
+  payload: dishId,
 });

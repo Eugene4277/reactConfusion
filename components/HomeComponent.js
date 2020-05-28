@@ -1,38 +1,47 @@
 import React, { Component } from "react";
-import { ScrollView, Text } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { Card } from "react-native-elements";
-import { LEADERS } from "../shared/leaders";
-import { PROMOTIONS } from "../shared/promotions";
-import { DISHES } from "../shared/dishes";
+import { baseUrl } from "../shared/baseUrl";
+import { connect } from "react-redux";
+import { Loading } from "./LoadingComponent";
+
+const mapStateToProps = (state) => {
+  return {
+    dishes: state.dishes,
+    leaders: state.leaders,
+    promotions: state.promotions,
+  };
+};
 
 function RenderItem(props) {
   const item = props.item;
 
-  if (item != null) {
+  if (props.isLoading) {
+    return <Loading />;
+  } else if (props.errMess) {
     return (
-      <Card
-        featuredTitle={item.name}
-        featuredSubtitle={item.designation}
-        image={require("./images/uthappizza.png")}
-      >
-        <Text style={{ margin: 10 }}>{item.description}</Text>
-      </Card>
+      <View>
+        <Text>{props.errMess}</Text>
+      </View>
     );
   } else {
-    return <View></View>;
+    if (item != null) {
+      return (
+        <Card
+          featuredTitle={item.name}
+          featuredSubtitle={item.designation}
+          image={{ uri: baseUrl + item.image }}
+        >
+          <Text style={{ margin: 10 }}>{item.description}</Text>
+        </Card>
+      );
+    } else {
+      return <View></View>;
+    }
   }
 }
 
 class Home extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      dishes: DISHES,
-      leaders: LEADERS,
-      promotions: PROMOTIONS,
-    };
-  }
-
   static navigationOptions = {
     title: "Home",
   };
@@ -41,17 +50,29 @@ class Home extends Component {
     return (
       <ScrollView>
         <RenderItem
-          item={this.state.dishes.filter((dish) => dish.featured)[0]}
+          item={this.props.dishes.dishes.filter((dish) => dish.featured)[0]}
+          isLoading={this.props.dishes.isLoading}
+          errMess={this.props.dishes.errMess}
         />
         <RenderItem
-          item={this.state.promotions.filter((promo) => promo.featured)[0]}
+          item={
+            this.props.promotions.promotions.filter(
+              (promo) => promo.featured
+            )[0]
+          }
+          errMess={this.props.promotions.errMess}
+          isLoading={this.props.promotions.isLoading}
         />
         <RenderItem
-          item={this.state.leaders.filter((leader) => leader.featured)[0]}
+          item={
+            this.props.leaders.leaders.filter((leader) => leader.featured)[0]
+          }
+          errMess={this.props.leaders.errMess}
+          isLoading={this.props.leaders.isLoading}
         />
       </ScrollView>
     );
   }
 }
 
-export default Home;
+export default connect(mapStateToProps)(Home);
