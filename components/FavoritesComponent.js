@@ -1,9 +1,11 @@
 import React, { Component } from "react";
-import { View, FlatList } from "react-native";
+import { View, FlatList, Alert } from "react-native";
 import { ListItem } from "react-native-elements";
 import { baseUrl } from "../shared/baseUrl";
 import { connect } from "react-redux";
 import { Loading } from "./LoadingComponent";
+import Swipeout from "react-native-swipeout";
+import { deleteFavorite } from "../redux/ActionCreators";
 
 const mapStateToProps = (state) => {
   return {
@@ -12,22 +14,55 @@ const mapStateToProps = (state) => {
   };
 };
 
+const mapDispatchToProps = (dispatch) => ({
+  deleteFavorite: (dishId) => dispatch(deleteFavorite(dishId)),
+});
+
 class Favorites extends Component {
   static navigationOptions = {
     title: "My Favorites",
   };
   render() {
     const { navigate } = this.props.navigation;
+
     const renderMenuItem = ({ item, index }) => {
+      const rightButton = [
+        {
+          text: "Delete",
+          type: "delete",
+          onPress: () => {
+            Alert.alert(
+              "Delete Favorite?",
+              "Are you sure you wish to delete the favorite dish" +
+                item.name +
+                "?",
+              [
+                {
+                  text: "Cancel",
+                  onPress: () => console.log(item.name + " not deleted"),
+                  style: "cancel",
+                },
+                {
+                  text: "OK",
+                  onPress: () => this.props.deleteFavorite(item.id),
+                },
+              ],
+              { cancelabel: false }
+            );
+          },
+        },
+      ];
       return (
-        <ListItem
-          key={index}
-          title={item.name}
-          subtitle={item.description}
-          hideChevron={true}
-          onPress={() => navigate("Dishdetail", { dishId: item.id })}
-          leftAvatar={{ source: { uri: baseUrl + item.image } }}
-        />
+        <Swipeout right={rightButton} autoclose={true}>
+          <ListItem
+            key={index}
+            title={item.name}
+            subtitle={item.description}
+            hideChevron={true}
+            onPress={() => navigate("Dishdetail", { dishId: item.id })}
+            leftAvatar={{ source: { uri: baseUrl + item.image } }}
+          />
+        </Swipeout>
       );
     };
     if (this.props.dishes.isLoading) {
@@ -52,4 +87,4 @@ class Favorites extends Component {
   }
 }
 
-export default connect(mapStateToProps)(Favorites);
+export default connect(mapStateToProps, mapDispatchToProps)(Favorites);

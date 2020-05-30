@@ -42,7 +42,6 @@ export const fetchDishes = () => (dispatch) => {
     .then(
       (response) => {
         if (response.ok) {
-          console.log("ok1");
           return response;
         } else {
           var error = new Error(
@@ -164,6 +163,11 @@ export const postFavorite = (dishId) => (dispatch) => {
 
 export const addFavorite = (dishId) => ({
   type: ActionTypes.ADD_FAVORITE,
+  payload: dishId,
+});
+
+export const deleteFavorite = (dishId) => ({
+  type: ActionTypes.DELETE_FAVORITE,
   payload: dishId,
 });
 
