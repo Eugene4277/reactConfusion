@@ -1,9 +1,18 @@
 import React, { Component } from "react";
-import { View, Text, ScrollView, FlatList } from "react-native";
-import { Card, Icon } from "react-native-elements";
+import {
+  View,
+  Text,
+  ScrollView,
+  FlatList,
+  StyleSheet,
+  Modal,
+  Button,
+} from "react-native";
+import { Card, Icon, Rating, Input } from "react-native-elements";
 import { baseUrl } from "../shared/baseUrl";
 import { connect } from "react-redux";
 import { postFavorite } from "../redux/ActionCreators";
+import { postComment } from "../redux/ActionCreators";
 
 const mapStateToProps = (state) => {
   return {
@@ -15,6 +24,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
   postFavorite: (dishId) => dispatch(postFavorite(dishId)),
+  postComment: (dishId, rating, author, comment, id) =>
+    dispatch(postComment(dishId, rating, author, comment, id)),
 });
 
 function RenderDish(props) {
@@ -24,16 +35,27 @@ function RenderDish(props) {
     return (
       <Card featuredTitle={dish.name} image={{ uri: baseUrl + dish.image }}>
         <Text style={{ margin: 10 }}>{dish.description}</Text>
-        <Icon
-          raised
-          reverse
-          name={props.favorite ? "heart" : "heart-o"}
-          type="font-awesome"
-          color="#f50"
-          onPress={() =>
-            props.favorite ? console.log("Already favorite") : props.onPress()
-          }
-        />
+
+        <View style={styles.cardRow}>
+          <Icon
+            raised
+            reverse
+            name={props.favorite ? "heart" : "heart-o"}
+            type="font-awesome"
+            color="#f50"
+            onPress={() =>
+              props.favorite ? console.log("Already favorite") : props.onPress()
+            }
+          />
+          <Icon
+            raised
+            reverse
+            name="pencil"
+            type="font-awesome"
+            color="#512DA8"
+            onPress={() => props.toggleModal()}
+          />
+        </View>
       </Card>
     );
   } else {
@@ -66,8 +88,34 @@ function RenderComments(props) {
 }
 
 class DishDetail extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      rating: 5,
+      author: "",
+      comment: "",
+      showModal: false,
+    };
+  }
+
   markFavorite(dishId) {
     this.props.postFavorite(dishId);
+  }
+
+  toggleModal() {
+    this.setState({ showModal: !this.state.showModal });
+  }
+
+  handleForm() {
+    const dishId = this.props.navigation.getParam("dishId", "");
+    this.props.postComment(
+      dishId,
+      this.state.rating,
+      this.state.author,
+      this.state.comment,
+      this.props.comments.comments.length
+    );
+    this.toggleModal();
   }
 
   static navigationOptions = {
@@ -76,22 +124,109 @@ class DishDetail extends Component {
 
   render() {
     const dishId = this.props.navigation.getParam("dishId", "");
-
     return (
       <ScrollView>
         <RenderDish
           dish={this.props.dishes.dishes[+dishId]}
           onPress={() => this.markFavorite(dishId)}
           favorite={this.props.favorites.some((el) => el === dishId)}
+          toggleModal={() => this.toggleModal()}
         />
         <RenderComments
           comments={this.props.comments.comments.filter(
             (comment) => comment.dishId === dishId
           )}
         />
+        <Modal
+          animationType={"slide"}
+          transparent={false}
+          visible={this.state.showModal}
+        >
+          <View style={styles.modal}>
+            <Rating
+              showRating
+              onFinishRating={(rating) => this.setState({ rating: rating })}
+              startingValue="5"
+            />
+            <Input
+              placeholder="Author"
+              containerStyle={{ margin: 10 }}
+              leftIcon={
+                <Icon
+                  name="user"
+                  size={24}
+                  color="black"
+                  type="font-awesome"
+                  iconStyle={{ marginRight: 10 }}
+                />
+              }
+              onChangeText={(value) => this.setState({ author: value })}
+            />
+
+            <Input
+              placeholder="Comment"
+              containerStyle={{ margin: 10 }}
+              leftIcon={
+                <Icon
+                  name="comment"
+                  size={24}
+                  color="black"
+                  type="font-awesome"
+                  iconStyle={{ marginRight: 10 }}
+                />
+              }
+              onChangeText={(value) => this.setState({ comment: value })}
+            />
+
+            <Button
+              onPress={() => this.handleForm()}
+              color="#512AD8"
+              title="Submit"
+            />
+            <Button
+              onPress={() => this.toggleModal()}
+              color="grey"
+              title="Close"
+            />
+          </View>
+        </Modal>
       </ScrollView>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  cardRow: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    flexDirection: "row",
+    margin: 20,
+  },
+  formLabel: {
+    fontSize: 18,
+    flex: 2,
+  },
+  formItem: {
+    flex: 1,
+  },
+  modal: {
+    justifyContent: "center",
+    margin: 20,
+    paddingTop: 15,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    backgroundColor: "#512DA8",
+    textAlign: "center",
+    color: "white",
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 18,
+    margin: 10,
+  },
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(DishDetail);
