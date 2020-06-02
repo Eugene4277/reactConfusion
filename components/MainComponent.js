@@ -11,6 +11,7 @@ import Menu from "./MenuComponent";
 import Reservation from "./ReservationComponent";
 import Favorites from "./FavoritesComponent";
 import Dishdetail from "./DishdetailComponent";
+import Login from "./LoginComponent";
 import {
   DrawerItems,
   SafeAreaView,
@@ -171,6 +172,31 @@ const FavoritesNavigator = createStackNavigator(
   }
 );
 
+const LoginNavigator = createStackNavigator(
+  {
+    Login: { screen: Login },
+  },
+  {
+    navigationOptions: ({ navigation }) => ({
+      headerStyle: {
+        backgroundColor: "#512DA8",
+      },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        color: "#fff",
+      },
+      headerLeft: (
+        <Icon
+          name="menu"
+          size={24}
+          color="white"
+          onPress={() => navigation.toggleDrawer()}
+        />
+      ),
+    }),
+  }
+);
+
 const AboutNavigator = createStackNavigator(
   {
     About: { screen: About },
@@ -220,6 +246,21 @@ const CustomDrawerContentComponent = (props) => (
 
 const MainNavigator = createDrawerNavigator(
   {
+    Login: {
+      screen: LoginNavigator,
+      navigationOptions: {
+        title: "Login",
+        drawerLabel: "Login",
+        drawerIcon: ({ tintColor }) => (
+          <Icon
+            name="sign-in"
+            type="font-awesome"
+            size={24}
+            color={tintColor}
+          />
+        ),
+      },
+    },
     Home: {
       screen: HomeNavigator,
       navigationOptions: {
@@ -297,6 +338,7 @@ const MainNavigator = createDrawerNavigator(
     },
   },
   {
+    initialRouteName: "Home",
     drawerBackgroundColor: "#d1c4e9",
     contentComponent: CustomDrawerContentComponent,
   }
