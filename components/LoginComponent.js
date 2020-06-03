@@ -6,6 +6,8 @@ import * as Permissions from "expo-permissions";
 import * as ImagePicker from "expo-image-picker";
 import { createBottomTabNavigator } from "react-navigation";
 import { baseUrl } from "../shared/baseUrl";
+import { Asset } from "expo-asset";
+import * as ImageManipulator from "expo-image-manipulator";
 
 class LoginTab extends Component {
   constructor(props) {
@@ -85,15 +87,17 @@ class LoginTab extends Component {
           <Button
             onPress={() => this.handleLogin()}
             title="Login"
-            buttonStyle={{ backgroundColor: "#512DA8" }}
             icon={
               <Icon
                 name="sign-in"
-                size={24}
                 type="font-awesome"
+                size={24}
                 color="white"
               />
             }
+            buttonStyle={{
+              backgroundColor: "#512DA8",
+            }}
           />
         </View>
         <View style={styles.formButton}>
@@ -101,15 +105,17 @@ class LoginTab extends Component {
             onPress={() => this.props.navigation.navigate("Register")}
             title="Register"
             clear
-            titleStyle={{ color: "blue" }}
             icon={
               <Icon
                 name="user-plus"
-                size={24}
                 type="font-awesome"
+                size={24}
                 color="blue"
               />
             }
+            titleStyle={{
+              color: "blue",
+            }}
           />
         </View>
       </View>
@@ -127,22 +133,10 @@ class RegisterTab extends Component {
       firstname: "",
       lastname: "",
       email: "",
-      imageUrl: baseUrl + "images/logo.png",
       remember: false,
+      imageUrl: baseUrl + "images/logo.png",
     };
   }
-
-  static navigationOptions = {
-    title: "Register",
-    tabBarIcon: ({ tintColor }) => (
-      <Icon
-        name="user-plus"
-        type="font-awesome"
-        size={24}
-        iconStyle={{ color: tintColor }}
-      />
-    ),
-  };
 
   getImageFromCamera = async () => {
     const cameraPermission = await Permissions.askAsync(Permissions.CAMERA);
@@ -152,24 +146,43 @@ class RegisterTab extends Component {
 
     if (
       cameraPermission.status === "granted" &&
-      cameraRollPermission === "granted"
+      cameraRollPermission.status === "granted"
     ) {
       let capturedImage = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [4, 3],
       });
-
       if (!capturedImage.cancelled) {
-        this.setState({
-          imageUrl: capturedImage.uri,
-        });
+        console.log(capturedImage);
+        this.processImage(capturedImage.uri);
       }
     }
   };
 
+  processImage = async (imageUri) => {
+    let processedImage = await ImageManipulator.manipulateAsync(
+      imageUri,
+      [{ resize: { width: 400 } }],
+      { format: "png" }
+    );
+    this.setState({ imageUrl: processedImage.uri });
+  };
+
+  static navigationOptions = {
+    title: "Register",
+    tabBarIcon: ({ tintColor, focused }) => (
+      <Icon
+        name="user-plus"
+        type="font-awesome"
+        size={24}
+        iconStyle={{ color: tintColor }}
+      />
+    ),
+  };
+
   handleRegister() {
     console.log(JSON.stringify(this.state));
-    if (this.state.remember) {
+    if (this.state.remember)
       SecureStore.setItemAsync(
         "userinfo",
         JSON.stringify({
@@ -177,7 +190,6 @@ class RegisterTab extends Component {
           password: this.state.password,
         })
       ).catch((error) => console.log("Could not save user info", error));
-    }
   }
 
   render() {
@@ -238,15 +250,17 @@ class RegisterTab extends Component {
             <Button
               onPress={() => this.handleRegister()}
               title="Register"
-              buttonStyle={{ backgroundColor: "#512DA8" }}
               icon={
                 <Icon
                   name="user-plus"
-                  size={24}
                   type="font-awesome"
+                  size={24}
                   color="white"
                 />
               }
+              buttonStyle={{
+                backgroundColor: "#512DA8",
+              }}
             />
           </View>
         </View>
@@ -255,24 +269,8 @@ class RegisterTab extends Component {
   }
 }
 
-const Login = createBottomTabNavigator(
-  {
-    Login: LoginTab,
-    Register: RegisterTab,
-  },
-  {
-    tabBarOptions: {
-      activeBackgroundColor: "#9575CD",
-      inactiveBackgroundColor: "#D1C4E9",
-      activeTintColor: "white",
-      inactiveTintColor: "gray",
-    },
-  }
-);
-
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
     justifyContent: "center",
     margin: 20,
   },
@@ -297,5 +295,20 @@ const styles = StyleSheet.create({
     margin: 60,
   },
 });
+
+const Login = createBottomTabNavigator(
+  {
+    Login: LoginTab,
+    Register: RegisterTab,
+  },
+  {
+    tabBarOptions: {
+      activeBackgroundColor: "#9575CD",
+      inactiveBackgroundColor: "#D1C4E9",
+      activeTintColor: "#ffffff",
+      inactiveTintColor: "gray",
+    },
+  }
+);
 
 export default Login;
