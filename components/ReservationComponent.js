@@ -15,6 +15,7 @@ import DatePicker from "react-native-datepicker";
 import * as Animatable from "react-native-animatable";
 import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
+import * as Calendar from "expo-calendar";
 
 class Reservation extends Component {
   constructor(props) {
@@ -24,6 +25,7 @@ class Reservation extends Component {
       smoking: false,
       date: "",
       showModal: false,
+      calendarId: "",
     };
   }
 
@@ -38,7 +40,7 @@ class Reservation extends Component {
   handleReservation() {
     //console.log(JSON.stringify(this.state));
     //this.toggleModal();
-
+    this.createCalendarEvent(this.state.date);
     Alert.alert(
       "Your reservation OK?",
       "Number of guests: " +
@@ -103,6 +105,57 @@ class Reservation extends Component {
         color: "#512DA8",
       },
     });
+  }
+
+  async obtainCalendarPermission() {
+    let permission = await Permissions.getAsync(Permissions.CALENDAR);
+    if (permission.status !== "granted") {
+      permission = await Permissions.askAsync(Permissions.CALENDAR);
+      if (permission.status !== "granted") {
+        Alert.alert("Permission not granted to show notifications");
+      }
+    }
+    return permission;
+  }
+
+  async getDefaultCalendarSource() {
+    const calendars = await Calendar.getCalendarsAsync();
+    const defaultCalendars = calendars.filter(
+      (each) => each.source.name === "Default"
+    );
+    console.log(calendars);
+    return defaultCalendars[0].source;
+  }
+
+  async createCalendarEvent(date) {
+    let granted = await this.obtainCalendarPermission();
+    if (granted) {
+      const defaultCalendarSource =
+        Platform.OS === "ios"
+          ? await this.getDefaultCalendarSource()
+          : { isLocalAccount: true, name: "Expo Calendar" };
+      const newCalendarID = await Calendar.createCalendarAsync({
+        title: "Expo Calendar",
+        color: "blue",
+        entityType: Calendar.EntityTypes.EVENT,
+        sourceId: defaultCalendarSource.id,
+        source: defaultCalendarSource,
+        name: "internalCalendarName",
+        ownerAccount: "personal",
+        accessLevel: Calendar.CalendarAccessLevel.OWNER,
+      });
+      console.log(`Your new calendar ID is: ${newCalendarID}`);
+
+      Calendar.createEventAsync(newCalendarID, {
+        title: "Table Reservation",
+        startDate: new Date(Date.parse(date)),
+        endDate: new Date(Date.parse(date) + 2 * 60 * 60 * 1000),
+        location:
+          "121, Clear Water Bay Road, Clear Water Bay, Kowloon, Hong Kong",
+        timeZone: "Asia/Hong_Kong",
+      });
+      Alert.alert("added to calendar!");
+    } else Alert.alert("no permission for calendar!");
   }
 
   render() {

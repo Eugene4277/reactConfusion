@@ -44,7 +44,7 @@ class LoginTab extends Component {
   };
 
   handleLogin() {
-    console.log(JSON.stringify(this.state));
+    //console.log(JSON.stringify(this.state));
     if (this.state.remember)
       SecureStore.setItemAsync(
         "userinfo",
@@ -159,6 +159,23 @@ class RegisterTab extends Component {
     }
   };
 
+  getImageFromGallery = async () => {
+    const cameraRollPermission = await Permissions.askAsync(
+      Permissions.CAMERA_ROLL
+    );
+
+    if (cameraRollPermission.status === "granted") {
+      let capturedImage = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+      });
+      if (!capturedImage.cancelled) {
+        console.log(capturedImage);
+        this.processImage(capturedImage.uri);
+      }
+    }
+  };
+
   processImage = async (imageUri) => {
     let processedImage = await ImageManipulator.manipulateAsync(
       imageUri,
@@ -181,7 +198,7 @@ class RegisterTab extends Component {
   };
 
   handleRegister() {
-    console.log(JSON.stringify(this.state));
+    //console.log(JSON.stringify(this.state));
     if (this.state.remember)
       SecureStore.setItemAsync(
         "userinfo",
@@ -202,7 +219,16 @@ class RegisterTab extends Component {
               loadingIndicatorSource={require("./images/logo.png")}
               style={styles.image}
             />
-            <Button title="Camera" onPress={this.getImageFromCamera} />
+            <Button
+              title="Camera"
+              style={styles.button}
+              onPress={this.getImageFromCamera}
+            />
+            <Button
+              title="Gallery"
+              style={styles.button}
+              onPress={this.getImageFromGallery}
+            />
           </View>
           <Input
             placeholder="Username"
@@ -271,6 +297,7 @@ class RegisterTab extends Component {
 
 const styles = StyleSheet.create({
   container: {
+    alignItems: "center",
     justifyContent: "center",
     margin: 20,
   },
@@ -283,6 +310,9 @@ const styles = StyleSheet.create({
     margin: 10,
     width: 80,
     height: 60,
+  },
+  button: {
+    margin: 10,
   },
   formInput: {
     margin: 20,
